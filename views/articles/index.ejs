@@ -4,153 +4,589 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <title>Blog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>ThoughtThread</title>
     <style>
+        :root {
+            --dark-bg: #000000;
+            --dark-surface: #1c1c1e;
+            --accent-color: #0071e3;
+            --accent-gradient: linear-gradient(135deg, #0071e3 0%, #47a3ff 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #86868b;
+            --sidebar-width: 280px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
         .sidebar {
             height: 100vh;
-            background-color: #212529;
-            padding: 20px;
+            background: linear-gradient(180deg, var(--dark-surface) 0%, rgba(28, 28, 30, 0.95) 100%);
+            padding: 1.5rem;
             position: fixed;
             left: 0;
             top: 0;
-            width: 250px;
-            color: #fff;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            width: var(--sidebar-width);
+            color: var(--text-primary);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+            overflow-y: auto;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            bottom: 2rem;
+            left: 1rem;
+            width: calc(var(--sidebar-width) - 2rem);
+            background: rgba(28, 28, 30, 0.95);
+            color: var(--text-primary);
+            border: none;
+            padding: 1rem;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1010;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(40, 40, 45, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle i {
+            font-size: 1.1rem;
+        }
+
+        .bookmark-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .bookmark-btn:hover {
+            color: var(--accent-color);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .bookmark-btn.active {
+            color: var(--accent-color);
+        }
+
+        .bookmark-btn i {
+            font-size: 1.2rem;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+        }
+        
+        .auth-btn-login {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+        }
+        
+        .auth-btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--text-primary);
+        }
+        
+        .auth-btn-signup {
+            background: var(--accent-gradient);
+            border: none;
+            color: var(--text-primary);
+            box-shadow: 0 4px 15px rgba(0, 113, 227, 0.2);
+        }
+        
+        .auth-btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 113, 227, 0.3);
+            color: var(--text-primary);
         }
         
         .sidebar .nav-link {
-            color: #adb5bd;
-            transition: color 0.3s ease;
+            color: var(--text-secondary);
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
         }
         
         .sidebar .nav-link:hover {
-            color: #fff;
-            background-color: #343a40;
-            border-radius: 5px;
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
         }
         
         .sidebar .nav-link.active {
-            color: #fff;
-            background-color: #0d6efd;
-            border-radius: 5px;
+            color: var(--text-primary);
+            background: var(--accent-gradient);
+            box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3);
+        }
+        
+        .sidebar .nav-link.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1));
+            pointer-events: none;
         }
         
         .sidebar hr {
-            border-color: #495057;
-            margin: 1rem 0;
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
         }
         
         .sidebar-heading {
-            color: #6c757d;
+            color: var(--text-secondary);
             text-transform: uppercase;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 0.1em;
-            margin-top: 1rem;
+            margin: 1.5rem 0 0.75rem;
+            padding-left: 1rem;
         }
         
         .sidebar-logo {
             padding: 1rem 0;
-            border-bottom: 1px solid #495057;
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .sidebar-logo img {
+            max-height: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-logo img:hover {
+            transform: scale(1.05);
+        }
+
+        .compose-btn {
+            background: var(--accent-gradient);
+            color: var(--text-primary);
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            width: 100%;
+            margin: 1rem 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 113, 227, 0.2);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .compose-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .compose-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .compose-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 113, 227, 0.3);
+            color: var(--text-primary);
         }
         
         .main-content {
-            margin-left: 250px;
-            padding: 20px;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+            background: var(--dark-bg);
+            animation: fadeIn 0.6s ease-out;
         }
         
         .hero-section {
-            background: linear-gradient(to right, #6c757d, #495057);
-            color: white;
-            padding: 3rem 0;
-            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+            border-radius: 24px;
+            padding: 4rem 3rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(71, 163, 255, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        .hero-section .lead {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            animation: slideIn 0.8s ease-out 0.2s backwards;
         }
         
         .article-card {
-            transition: transform 0.2s;
+            background: var(--dark-surface);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .article-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+        
+        .article-card:hover::before {
+            transform: scaleX(1);
         }
         
         .article-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .article-card .card-body {
+            padding: 2rem;
+        }
+
+        .article-card .card-title {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .article-card .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .article-card .card-text {
+            color: var(--text-secondary);
+            margin: 1.5rem 0;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .article-meta > div {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         
         .search-bar {
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
+            position: relative;
         }
-        
-        .footer {
-            margin-top: 3rem;
-            padding: 2rem 0;
-            background-color: #f8f9fa;
-            text-align: center;
+
+        .search-bar input {
+            background: var(--dark-surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            padding: 1.2rem 1rem 1.2rem 3.5rem;
+            border-radius: 16px;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.1rem;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .search-bar input:focus + i {
+            color: var(--accent-color);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 113, 227, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 113, 227, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%);
+            border: none;
+            padding: 0.6rem;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #ff453a 0%, #ff5147 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .hero-section {
+                padding: 3rem 1.5rem;
+            }
+
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Updated Sidebar -->
+    <!-- Sidebar -->
     <div class="sidebar">
-        <div class="sidebar-logo">
-            <img src="/images/logo-white.png" alt="logo" class="img-fluid" style="max-height: 60px;">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="/images/logo-white.png" alt="ThoughtThread Logo">
+            </div>
         </div>
+
+        <div class="auth-buttons">
+            <a href="/login" class="auth-btn auth-btn-login">Sign In</a>
+            <a href="/register" class="auth-btn auth-btn-signup">Sign Up</a>
+        </div>
+
+        <a href="/articles/new" class="compose-btn">
+            <i class="fas fa-plus"></i>
+            New Article
+        </a>
+
         <div class="nav flex-column">
-            <a href="/" class="nav-link active mb-2">
-                <i class="fas fa-home me-2"></i> Home
+            <a href="/" class="nav-link active">
+                <i class="fas fa-home"></i>
+                Home
             </a>
-            <a href="/articles" class="nav-link mb-2">
-                <i class="fas fa-newspaper me-2"></i> Articles
+            <a href="/articles/my" class="nav-link">
+                <i class="fas fa-newspaper"></i>
+                My Articles
             </a>
-            <a href="/login" class="nav-link mb-2">
-                <i class="fas fa-sign-in-alt me-2"></i> Login
+            <a href="/articles/bookmarks" class="nav-link">
+                <i class="fas fa-bookmark"></i>
+                Bookmarks
+                <span class="bookmark-count ms-auto">0</span>
             </a>
             
             <hr>
             
-            <h6 class="sidebar-heading">Categories</h6>
-            <a href="#" class="nav-link mb-2">
-                <i class="fas fa-laptop-code me-2"></i> Technology
+            <div class="sidebar-heading">Categories</div>
+            <a href="/articles/category/technology" class="nav-link">
+                <i class="fas fa-laptop-code"></i>
+                Technology
             </a>
-            <a href="#" class="nav-link mb-2">
-                <i class="fas fa-flask me-2"></i> Science
+            <a href="/articles/category/science" class="nav-link">
+                <i class="fas fa-flask"></i>
+                Science
             </a>
-            <a href="#" class="nav-link mb-2">
-                <i class="fas fa-heart me-2"></i> Life
+            <a href="/articles/category/life" class="nav-link">
+                <i class="fas fa-heart"></i>
+                Life
+            </a>
+            <a href="/articles/category/ai" class="nav-link">
+                <i class="fas fa-brain"></i>
+                AI & ML
             </a>
         </div>
+
+        <button class="theme-toggle">
+            <i class="fas fa-moon"></i>
+            <span>Dark Mode</span>
+        </button>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
         <!-- Hero Section -->
-        <div class="hero-section text-center">
+        <div class="hero-section">
             <h1>Welcome to ThoughtThread</h1>
-            <p>Share your ideas with the world</p>
-            <a href="/articles/new" class="btn btn-light btn-lg">Start Writing</a>
+            <p class="lead">Share your ideas with the world</p>
         </div>
 
         <!-- Search Bar -->
         <div class="search-bar">
             <input type="search" class="form-control" placeholder="Search articles...">
+            <i class="fas fa-search"></i>
         </div>
 
         <!-- Articles Grid -->
-        <div class="row">
+        <div class="row g-4">
             <% articles.forEach(article => { %>
-                <div class="col-md-6 mb-4">
-                    <div class="card article-card h-100">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card article-card">
                         <div class="card-body">
-                            <h4 class="card-title"><%= article.title %></h4>
-                            <div class="card-subtitle text-muted mb-2">
-                                <%= article.createdAt.toLocaleDateString() %>
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h4 class="card-title"><%= article.title %></h4>
+                                <button class="bookmark-btn" data-article-id="<%= article.id %>" onclick="toggleBookmark(this)">
+                                    <i class="far fa-bookmark"></i>
+                                </button>
                             </div>
-                            <div class="card-text mb-2">
+                            <div class="article-meta">
+                                <div>
+                                    <i class="far fa-calendar"></i>
+                                    <%= article.createdAt.toLocaleDateString() %>
+                                </div>
+                                <div>
+                                    <i class="far fa-clock"></i>
+                                    5 min read
+                                </div>
+                            </div>
+                            <div class="card-text">
                                 <%= article.description %>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
-                                <a href="articles/<%= article.slug %>" class="btn btn-primary">Read more</a>
+                                <a href="articles/<%= article.slug %>" class="btn btn-primary">
+                                    <i class="fas fa-book-reader me-2"></i>
+                                    Read more
+                                </a>
                                 <form action="/articles/<%= article.id %>?_method=DELETE" method="POST" class="d-inline">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -158,27 +594,116 @@
                 </div>
             <% }) %>
         </div>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-4">
-                        <h5>About</h5>
-                        <p>A platform for sharing thoughts and ideas</p>
-                    </div>
-                    <div class="col-md-4">
-                        <h5>Quick Links</h5>
-                        <a href="#" class="d-block">Terms of Service</a>
-                        <a href="#" class="d-block">Privacy Policy</a>
-                    </div>
-                    <div class="col-md-4">
-                        <h5>Contact</h5>
-                        <p>Email: contact@thoughtthread.com</p>
-                    </div>
-                </div>
-            </div>
-        </footer>
     </div>
+
+    <script>
+        // Dark mode toggle functionality
+        const themeToggle = document.querySelector('.theme-toggle');
+        const body = document.body;
+        
+        // Load theme preference from localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.classList.toggle('light-mode', savedTheme === 'light');
+            updateThemeToggle(savedTheme === 'light');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const isLight = body.classList.toggle('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            updateThemeToggle(isLight);
+        });
+
+        function updateThemeToggle(isLight) {
+            const icon = themeToggle.querySelector('i');
+            const text = themeToggle.querySelector('span');
+            icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+            text.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        }
+
+        // Bookmark functionality
+        function toggleBookmark(btn) {
+            const articleId = btn.dataset.articleId;
+            const icon = btn.querySelector('i');
+            const isBookmarked = icon.classList.contains('fas');
+            
+            // Toggle bookmark icon
+            icon.classList.toggle('far', isBookmarked);
+            icon.classList.toggle('fas', !isBookmarked);
+            btn.classList.toggle('active', !isBookmarked);
+            
+            // Get existing bookmarks from localStorage
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            
+            if (isBookmarked) {
+                // Remove from bookmarks
+                const index = bookmarks.indexOf(articleId);
+                if (index > -1) bookmarks.splice(index, 1);
+            } else {
+                // Add to bookmarks
+                if (!bookmarks.includes(articleId)) {
+                    bookmarks.push(articleId);
+                }
+            }
+            
+            // Save updated bookmarks
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            
+            // Update bookmark count in sidebar
+            updateBookmarkCount(bookmarks.length);
+        }
+
+        function updateBookmarkCount(count) {
+            const countElement = document.querySelector('.bookmark-count');
+            if (countElement) {
+                countElement.textContent = count;
+            }
+        }
+
+        // Initialize bookmarks on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            
+            // Update bookmark icons for bookmarked articles
+            bookmarks.forEach(articleId => {
+                const btn = document.querySelector(`.bookmark-btn[data-article-id="${articleId}"]`);
+                if (btn) {
+                    const icon = btn.querySelector('i');
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update bookmark count
+            updateBookmarkCount(bookmarks.length);
+            
+            // Initialize card animations
+            observeCards();
+        });
+
+        // Mobile sidebar toggle
+        const toggleSidebar = () => {
+            document.querySelector('.sidebar').classList.toggle('show');
+        };
+
+        // Add animation to cards on scroll
+        const observeCards = () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.article-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                observer.observe(card);
+            });
+        };
+    </script>
 </body>
 </html>
