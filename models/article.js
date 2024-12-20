@@ -23,7 +23,19 @@ const articleSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true
-  }
+  },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  category: {
+    type: String,
+    default: 'Uncategorized'
+  },
+  tags: [{
+    type: String
+  }]
 });
 
 articleSchema.pre('validate', function(next) {
